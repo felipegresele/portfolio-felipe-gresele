@@ -62,4 +62,4 @@ Para gerar o build de produção: `npm run build`
 ## 📬 Contato
 
 - 🐙 GitHub: [@felipegresele](https://github.com/felipegresele)
-- 💼 LinkedIn: [@linkedln](https://www.linkedin.com/in/felipe-gresele-3065a72a3/)
+- 💼 LinkedIn: [@linkedin](https://www.linkedin.com/in/felipe-gresele-3065a72a3/)
