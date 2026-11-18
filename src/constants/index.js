@@ -24,11 +24,11 @@ export const navLinks = [
     title: "Sobre",
   },
   {
-    id: "stack",
-    title: "Stack",
+    id: "projects",
+    title: "Projetos",
   },
   {
-    id: "work",
+    id: "experience",
     title: "Experiência",
   },
   {
@@ -202,4 +202,4 @@ const projects = [
   
 ];
 
-export { services, technologies, experiences, testimonials, projects };
+export { services, technologies, projects };
