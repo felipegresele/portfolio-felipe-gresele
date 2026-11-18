@@ -14,7 +14,6 @@ Portfólio pessoal responsivo, com cenas 3D e animações, que apresenta meus pr
 ## ✨ Funcionalidades
 
 - Layout responsivo (mobile, tablet e desktop)
-- Cenas 3D interativas com React Three Fiber (computador, planeta e estrelas)
 - Animações de entrada com Framer Motion
 - Seção de projetos com links para demo e repositório
 - Linha do tempo de experiência profissional
@@ -39,7 +38,6 @@ src/
 ├── api/          # Integração com a API do GitHub
 ├── assets/       # Imagens, ícones e logos
 ├── components/   # Seções do site (Hero, About, Work, Contact...)
-│   └── canvas/   # Cenas 3D
 ├── constants/    # Projetos, tecnologias e links de navegação
 ├── hoc/          # Wrapper das seções
 └── utils/        # Variantes de animação
