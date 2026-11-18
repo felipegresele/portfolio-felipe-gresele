@@ -3,9 +3,10 @@ import { BrowserRouter } from "react-router-dom"
 import NavBar from "./components/Navbar"
 import Hero from "./components/Hero"
 import About from "./components/About"
-import Tech from "./components/Tech"
 import Work from "./components/Work"
 import Contact from "./components/Contact"
+import Experience from "./components/Experience"
+import Github from "./components/Github"
 
 const App = () => {
   return (
@@ -17,8 +18,9 @@ const App = () => {
           <Hero />
         </div>
         <About />
-        <Tech />
         <Work />
+        <Experience />
+        <Github />
         <Contact />
       </div>
     </BrowserRouter>
