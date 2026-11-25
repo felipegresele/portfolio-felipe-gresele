@@ -3,10 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { SectionWrapper } from "../hoc";
 import { fadeIn, textVariant } from "../utils/motion";
+import { useLanguage, t } from "../i18n";
+import { pixelPalette } from "../theme";
 
-const PURPLE = "#a78bfa"; // roxo claro
-const HOVER_RGB = [233, 223, 255]; // cor dos pixels sob o mouse
-const BASE_RGB = [167, 139, 250];
+const ACCENT = "var(--accent)"; // cor de destaque do tema (roxo escuro / laranja claro)
 const COLS = 32;
 const ROWS = 32;
 
@@ -67,7 +67,7 @@ const tabs = [
 
 /* ---------- Tag ---------- */
 const Tag = ({ children }) => (
-  <span className="font-mono text-[12px] font-semibold text-white bg-[#a78bfa]/15 border border-[#a78bfa]/50 rounded-full px-2.5 py-0.5">
+  <span className="font-mono text-[12px] font-semibold text-white bg-accent/15 border border-accent/50 rounded-full px-2.5 py-0.5">
     {children}
   </span>
 );
@@ -172,6 +172,11 @@ const PixelCanvas = ({ grid }) => {
       const gap = cell * 0.16;
       const s = cell - gap;
 
+      // cores de destaque do tema atual (roxo escuro / laranja claro)
+      const [pr, pg, pb] = pixelPalette().accent;
+      const [hr, hg, hb] = pixelPalette().hover;
+      const offColor = `rgba(${pixelPalette().off.join(",")},0.05)`;
+
       const mc = mouse.x / cell;
       const mr = mouse.y / cell;
       const scanRow = ((now / 70) % (ROWS + 14)) - 7;
@@ -197,14 +202,11 @@ const PixelCanvas = ({ grid }) => {
           }
           b = Math.min(1, Math.max(b, h * 0.85) + h * 0.25);
 
-          const cr = Math.round(BASE_RGB[0] + (HOVER_RGB[0] - BASE_RGB[0]) * h);
-          const cg = Math.round(BASE_RGB[1] + (HOVER_RGB[1] - BASE_RGB[1]) * h);
-          const cb = Math.round(BASE_RGB[2] + (HOVER_RGB[2] - BASE_RGB[2]) * h);
+          const cr = Math.round(pr + (hr - pr) * h);
+          const cg = Math.round(pg + (hg - pg) * h);
+          const cb = Math.round(pb + (hb - pb) * h);
 
-          ctx.fillStyle =
-            b < 0.03
-              ? "rgba(255,255,255,0.05)"
-              : `rgba(${cr},${cg},${cb},${0.15 + 0.85 * b})`;
+          ctx.fillStyle = b < 0.03 ? offColor : `rgba(${cr},${cg},${cb},${0.15 + 0.85 * b})`;
 
           const s2 = s * (1 + h * 0.4);
           const x = c * cell + cell / 2 - s2 / 2;
@@ -230,17 +232,17 @@ const PixelCanvas = ({ grid }) => {
   }, [grid]);
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#0d1117] p-4">
+    <div className="rounded-2xl border border-white/10 bg-surface-2 p-4">
       <canvas ref={canvasRef} className="block" />
     </div>
   );
 };
 
 /* ---------- Card de experiência (expansível) ---------- */
-const ExperienceCard = ({ item, open, onToggle }) => (
+const ExperienceCard = ({ item, idx, open, onToggle }) => (
   <div
-    className={`rounded-2xl border bg-[#151a22] transition-colors ${
-      open ? "border-[#a78bfa]/50" : "border-white/10 hover:border-[#a78bfa]/30"
+    className={`rounded-2xl border bg-surface transition-colors ${
+      open ? "border-accent/50" : "border-white/10 hover:border-accent/30"
     }`}
   >
     <button
@@ -252,28 +254,28 @@ const ExperienceCard = ({ item, open, onToggle }) => (
       <span
         className={`mt-1 shrink-0 w-[22px] h-[22px] rounded-md border ${
           item.current
-            ? "bg-[#a78bfa] border-[#a78bfa] shadow-[0_0_14px_rgba(167,139,250,0.55)]"
-            : "bg-[#a78bfa]/25 border-[#a78bfa]/60"
+            ? "bg-accent border-accent shadow-[0_0_14px_rgb(var(--accent-rgb)/0.55)]"
+            : "bg-accent/25 border-accent/60"
         }`}
       />
 
       <div className="flex-1 min-w-0">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <h3 className="text-white font-bold text-[18px] sm:text-[20px] leading-tight">
-            {item.title}
+            {t(`experience.items.${idx}.title`)}
           </h3>
           {item.current && (
-            <span className="font-mono text-[11px] text-[#c4b5fd] border border-[#a78bfa]/50 rounded-full px-2 py-0.5">
-              atual
+            <span className="font-mono text-[11px] text-accent-soft border border-accent/50 rounded-full px-2 py-0.5">
+              {t("experience.current")}
             </span>
           )}
         </div>
         <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span className="text-[#c4b5fd] font-semibold text-[15px]">
+          <span className="text-accent-soft font-semibold text-[15px]">
             {item.org}
           </span>
           <span className="font-mono text-[12px] text-gray-500">
-            {item.period}
+            {t(`experience.items.${idx}.period`)}
           </span>
         </div>
       </div>
@@ -300,18 +302,18 @@ const ExperienceCard = ({ item, open, onToggle }) => (
         >
           <div className="px-5 pb-5 pl-[58px]">
             <ul className="space-y-2">
-              {item.bullets.map((b) => (
+              {item.bullets.map((b, j) => (
                 <li
                   key={b}
-                  className="relative pl-4 text-secondary text-[15px] leading-[26px] before:content-[''] before:absolute before:left-0 before:top-[11px] before:w-1.5 before:h-1.5 before:rounded-full before:bg-[#a78bfa]/60"
+                  className="relative pl-4 text-secondary text-[15px] leading-[26px] before:content-[''] before:absolute before:left-0 before:top-[11px] before:w-1.5 before:h-1.5 before:rounded-full before:bg-accent/60"
                 >
-                  {b}
+                  {t(`experience.items.${idx}.bullets.${j}`)}
                 </li>
               ))}
             </ul>
             <div className="mt-4 flex flex-wrap gap-1.5">
-              {item.tags.map((t) => (
-                <Tag key={t}>{t}</Tag>
+              {item.tags.map((tg) => (
+                <Tag key={tg}>{tg}</Tag>
               ))}
             </div>
           </div>
@@ -331,6 +333,7 @@ const ExperienceTab = () => {
         <ExperienceCard
           key={`${item.title}-${item.period}`}
           item={item}
+          idx={i}
           open={openIndex === i}
           onToggle={() => setOpenIndex(openIndex === i ? -1 : i)}
         />
@@ -343,53 +346,55 @@ const ExperienceTab = () => {
 const EducationTab = () => (
   <div className="space-y-4">
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      {education.map((item) => (
+      {education.map((item, i) => (
         <div
           key={item.title}
-          className={`rounded-2xl border bg-[#151a22] p-5 transition-colors ${
+          className={`rounded-2xl border bg-surface p-5 transition-colors ${
             item.current
-              ? "border-[#a78bfa]/50"
-              : "border-white/10 hover:border-[#a78bfa]/30"
+              ? "border-accent/50"
+              : "border-white/10 hover:border-accent/30"
           }`}
         >
           <div className="flex items-center justify-between gap-3">
             <span className="font-mono text-[12px] text-gray-500">
-              {item.degree}
+              {t(`experience.education.${i}.degree`)}
             </span>
             {item.current ? (
-              <span className="font-mono text-[11px] text-[#c4b5fd] border border-[#a78bfa]/50 rounded-full px-2 py-0.5">
-                em andamento
+              <span className="font-mono text-[11px] text-accent-soft border border-accent/50 rounded-full px-2 py-0.5">
+                {t("experience.inProgress")}
               </span>
             ) : (
               <span className="font-mono text-[11px] text-gray-400 border border-white/15 rounded-full px-2 py-0.5">
-                concluído
+                {t("experience.completed")}
               </span>
             )}
           </div>
           <h3 className="mt-3 text-white font-bold text-[18px] leading-snug">
-            {item.title}
+            {t(`experience.education.${i}.title`)}
           </h3>
-          <p className="mt-2 text-[#c4b5fd] font-semibold text-[15px]">
+          <p className="mt-2 text-accent-soft font-semibold text-[15px]">
             {item.org}
           </p>
           <p className="mt-1 font-mono text-[12px] text-gray-500">
-            {item.period}
+            {t(`experience.education.${i}.period`)}
           </p>
         </div>
       ))}
     </div>
 
     {/* Idiomas */}
-    <div className="rounded-2xl border border-white/10 bg-[#151a22] p-5">
-      <h3 className="text-white font-bold text-[18px]">Idiomas</h3>
+    <div className="rounded-2xl border border-white/10 bg-surface p-5">
+      <h3 className="text-white font-bold text-[18px]">{t("experience.languagesTitle")}</h3>
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {languages.map((l) => (
+        {languages.map((l, i) => (
           <div
             key={l.name}
-            className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-[#0d1117] px-4 py-3"
+            className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-surface-2 px-4 py-3"
           >
-            <p className="text-white text-[15px] font-semibold">{l.name}</p>
-            <Tag>{l.level}</Tag>
+            <p className="text-white text-[15px] font-semibold">
+              {t(`experience.languages.${i}.name`)}
+            </p>
+            <Tag>{t(`experience.languages.${i}.level`)}</Tag>
           </div>
         ))}
       </div>
@@ -399,6 +404,7 @@ const EducationTab = () => (
 
 /* ---------- Seção ---------- */
 const Experience = () => {
+  useLanguage(); // re-renderiza quando o idioma muda
   const [tab, setTab] = useState("exp");
 
   return (
@@ -410,11 +416,11 @@ const Experience = () => {
       >
         <PixelCanvas grid={gitGraph} />
 
-        <div className="mt-5 rounded-2xl border border-white/10 bg-[#0d1117] px-5 py-4 font-mono text-[14px]">
-          <span style={{ color: PURPLE }}>HEAD</span>
+        <div className="mt-5 rounded-2xl border border-white/10 bg-surface-2 px-5 py-4 font-mono text-[14px]">
+          <span style={{ color: ACCENT }}>HEAD</span>
           <p className="mt-1">
             <span className="text-gray-400">merge:</span>{" "}
-            <span className="text-white">experiência + formação</span>
+            <span className="text-white">{t("experience.mergeText")}</span>
           </p>
         </div>
       </motion.div>
@@ -423,14 +429,14 @@ const Experience = () => {
       <div>
         <motion.div variants={textVariant()}>
           <div className="flex items-center gap-3 font-mono text-[14px]">
-            <span style={{ color: PURPLE }}>03 / trajetória</span>
+            <span style={{ color: ACCENT }}>{t("experience.label")}</span>
             <div className="flex gap-[3px]">
               {Array.from({ length: 18 }).map((_, i) => (
                 <span
                   key={i}
                   className="w-[10px] h-[10px] rounded-[2px]"
                   style={{
-                    background: i % 3 === 2 ? "#6b7280" : PURPLE,
+                    background: i % 3 === 2 ? "#6b7280" : ACCENT,
                     opacity: 0.25 + ((i * 41) % 75) / 100,
                   }}
                 />
@@ -438,7 +444,7 @@ const Experience = () => {
             </div>
           </div>
           <h2 className="mt-3 text-white font-black tracking-tight text-[40px] sm:text-[56px] leading-[1.05]">
-            Experiência e formação
+            {t("experience.title")}
           </h2>
         </motion.div>
 
@@ -446,29 +452,29 @@ const Experience = () => {
           {/* Abas */}
           <div
             role="tablist"
-            className="mt-8 inline-flex rounded-full border border-white/10 bg-[#0d1117] p-1"
+            className="mt-8 inline-flex rounded-full border border-white/10 bg-surface-2 p-1"
           >
-            {tabs.map((t) => (
+            {tabs.map((tb) => (
               <button
-                key={t.id}
+                key={tb.id}
                 role="tab"
-                aria-selected={tab === t.id}
-                onClick={() => setTab(t.id)}
+                aria-selected={tab === tb.id}
+                onClick={() => setTab(tb.id)}
                 className="relative px-5 py-2 rounded-full text-[14px] font-semibold transition-colors"
               >
-                {tab === t.id && (
+                {tab === tb.id && (
                   <motion.span
                     layoutId="exp-tab-pill"
-                    className="absolute inset-0 rounded-full bg-[#a78bfa]"
+                    className="absolute inset-0 rounded-full bg-accent"
                     transition={{ type: "spring", stiffness: 400, damping: 32 }}
                   />
                 )}
                 <span
                   className={`relative ${
-                    tab === t.id ? "text-[#0d1117]" : "text-gray-400 hover:text-white"
+                    tab === tb.id ? "text-[#0d1117]" : "text-gray-400 hover:text-white"
                   }`}
                 >
-                  {t.label}
+                  {t(`experience.tabs.${tb.id}`)}
                 </span>
               </button>
             ))}

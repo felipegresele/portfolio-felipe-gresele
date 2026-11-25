@@ -3,8 +3,9 @@ import { motion, useReducedMotion } from "framer-motion";
 
 import { SectionWrapper } from "../hoc";
 import { fadeIn, textVariant } from "../utils/motion";
+import { useLanguage, t } from "../i18n";
 
-const PURPLE = "#a78bfa"; // roxo claro
+const ACCENT = "var(--accent)"; // cor de destaque do tema (roxo escuro / laranja claro)
 
 /* Skills curadas:
    core  = tecnologias principais (destacadas em roxo)
@@ -45,9 +46,9 @@ const skills = [
 
 const Tag = ({ children, variant = "more" }) => {
   const styles = {
-    core: "text-white bg-[#a78bfa]/15 border-[#a78bfa]/50",
-    more: "text-gray-300 bg-[#0d1117] border-white/10",
-    study: "text-[#c4b5fd] bg-transparent border-dashed border-[#a78bfa]/50",
+    core: "text-white bg-accent/15 border-accent/50",
+    more: "text-gray-300 bg-surface-2 border-white/10",
+    study: "text-accent-soft bg-transparent border-dashed border-accent/50",
   };
   return (
     <span
@@ -91,7 +92,7 @@ const stacks = [
   { name: "TypeScript", sources: ["si:typescript", "devc:typescript/typescript-original"], bg: "linear-gradient(145deg,#4a90e2,#2563b8)", x: 53, y: 50, r: 8 },
   { name: "AWS", custom: "aws", bg: "linear-gradient(145deg,#334357,#18222f)", x: 76, y: 50, r: -4 },
   { name: "GCP", sources: ["si:googlecloud", "devc:googlecloud/googlecloud-original"], bg: "linear-gradient(145deg,#f4685a,#d03427)", x: 42, y: 33, r: 6 },
-  { name: "JUnit", sources: ["si:junit5", "devc:junit/junit-original"], bg: "linear-gradient(145deg,#f0508a,#c21f5e)", x: 53, y: 15, r: 4 },
+  { name: "JUnit 5", sources: ["si:junit5", "devc:junit/junit-original"], bg: "linear-gradient(145deg,#f0508a,#c21f5e)", x: 53, y: 15, r: 4 },
 ];
 
 /* Logo da AWS desenhado em SVG: "aws" + sorriso laranja com seta */
@@ -252,6 +253,7 @@ const step = (bodies, drag, dt) => {
 };
 
 const StackPile = () => {
+  useLanguage(); // re-renderiza quando o idioma muda
   const boxRef = useRef(null);
   const outerRefs = useRef([]);
   const tileRefs = useRef([]);
@@ -358,9 +360,12 @@ const StackPile = () => {
   };
 
   return (
-    <div>
-      <div className="rounded-2xl border border-white/10 bg-[#0d1117] p-5">
-        <h3 className="text-white text-[20px] font-bold">Stacks</h3>
+    <div className="h-full">
+      <div className="h-full flex flex-col rounded-2xl border border-white/10 bg-surface-2 p-5">
+        <h3 className="text-white text-[20px] font-bold">{t("about.stacksTitle")}</h3>
+
+        {/* espaço flexível: se a caixa for mais alta, a sobra fica aqui em cima */}
+        <div className="flex-1" />
 
         {/* área quadrada onde a pilha cai e se mexe */}
         <div
@@ -386,7 +391,7 @@ const StackPile = () => {
             >
               {/* nome da stack no hover */}
               {hovered === i && (
-                <span className="pointer-events-none absolute left-1/2 -top-8 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#a78bfa] px-2.5 py-1 font-mono text-[11px] font-bold text-[#0d1117] shadow-lg">
+                <span className="pointer-events-none absolute left-1/2 -top-8 -translate-x-1/2 whitespace-nowrap rounded-full bg-accent px-2.5 py-1 font-mono text-[11px] font-bold text-[#0d1117] shadow-lg">
                   {item.name}
                 </span>
               )}
@@ -441,29 +446,26 @@ const StackPile = () => {
           ))}
         </div>
       </div>
-
-      <p className="mt-3 font-mono text-[12px] text-gray-500">
-        arraste os cards para mexer na pilha
-      </p>
     </div>
   );
 };
 
 /* ---------- Seção ---------- */
 const About = () => {
+  useLanguage(); // re-renderiza quando o idioma muda
   return (
     <>
       {/* Topo: título + texto */}
       <motion.div variants={textVariant()}>
         <div className="flex items-center gap-3 font-mono text-[14px]">
-          <span style={{ color: PURPLE }}>01 / sobre</span>
+          <span style={{ color: ACCENT }}>{t("about.label")}</span>
           <div className="flex gap-[3px]">
             {Array.from({ length: 18 }).map((_, i) => (
               <span
                 key={i}
                 className="w-[10px] h-[10px] rounded-[2px]"
                 style={{
-                  background: i % 3 === 0 ? "#6b7280" : PURPLE,
+                  background: i % 3 === 0 ? "#6b7280" : ACCENT,
                   opacity: 0.25 + ((i * 37) % 75) / 100,
                 }}
               />
@@ -471,7 +473,7 @@ const About = () => {
           </div>
         </div>
         <h2 className="mt-3 text-white font-black tracking-tight text-[40px] sm:text-[56px] leading-[1.05]">
-          Visão Geral.
+          {t("about.title")}
         </h2>
       </motion.div>
 
@@ -479,41 +481,35 @@ const About = () => {
         variants={fadeIn("", "", 0.1, 1)}
         className="mt-4 text-secondary text-[17px] leading-[30px] max-w-4xl"
       >
-        Desenvolvedor Fullstack Júnior com foco em Back-end, atuando com Java,
-        Spring Boot, React e TypeScript. Projeto e desenvolvo APIs REST e
-        microsserviços escaláveis, com mensageria, MongoDB e AWS, aplicando
-        boas práticas de engenharia e orientando as soluções às necessidades do
-        negócio. Atualmente, aprofundo meus estudos em IA aplicada ao
-        desenvolvimento, explorando como ela pode aprimorar a qualidade e a
-        eficiência das soluções que entrego.
+        {t("about.intro")}
       </motion.p>
 
       {/* Abaixo: pilha de stacks à esquerda (40%) + skills à direita (60%) */}
-      <div className="mt-12 grid grid-cols-1 lg:grid-cols-[2fr_3fr] gap-10 lg:gap-14 items-start">
-        <motion.div variants={fadeIn("right", "spring", 0.2, 0.9)}>
+      <div className="mt-12 grid grid-cols-1 lg:grid-cols-[2fr_3fr] gap-10 lg:gap-14 items-stretch">
+        <motion.div className="h-full" variants={fadeIn("right", "spring", 0.2, 0.9)}>
           <StackPile />
         </motion.div>
 
-        <motion.div variants={fadeIn("up", "spring", 0.2, 0.75)}>
+        <motion.div className="h-full" variants={fadeIn("up", "spring", 0.2, 0.75)}>
           {/* Skills em lista compacta com hierarquia */}
-          <div className="rounded-2xl border border-white/10 bg-[#151a22] overflow-hidden">
-            {skills.map((item) => (
+          <div className="h-full flex flex-col rounded-2xl border border-white/10 bg-surface overflow-hidden">
+            {skills.map((item, idx) => (
               <div
                 key={item.title}
-                className="group flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-6 px-5 py-4 border-t border-white/10 first:border-t-0 hover:bg-white/[0.02] transition-colors"
+                className="group flex flex-1 flex-col sm:flex-row sm:items-start gap-2 sm:gap-6 px-5 py-4 border-t border-white/10 first:border-t-0 hover:bg-white/[0.02] transition-colors"
               >
-                <h3 className="sm:w-44 shrink-0 text-white text-[16px] font-bold sm:pt-[3px] group-hover:text-[#a78bfa] transition-colors">
-                  {item.title}
+                <h3 className="sm:w-44 shrink-0 text-white text-[16px] font-bold sm:pt-[3px] group-hover:text-accent transition-colors">
+                  {t(`about.skills.${idx}.title`)}
                 </h3>
                 <div className="flex flex-wrap gap-1.5">
-                  {item.core?.map((tag) => (
-                    <Tag key={tag} variant="core">{tag}</Tag>
+                  {item.core?.map((tag, j) => (
+                    <Tag key={tag} variant="core">{t(`about.skills.${idx}.core.${j}`)}</Tag>
                   ))}
-                  {item.more?.map((tag) => (
-                    <Tag key={tag} variant="more">{tag}</Tag>
+                  {item.more?.map((tag, j) => (
+                    <Tag key={tag} variant="more">{t(`about.skills.${idx}.more.${j}`)}</Tag>
                   ))}
-                  {item.study?.map((tag) => (
-                    <Tag key={tag} variant="study">{tag}</Tag>
+                  {item.study?.map((tag, j) => (
+                    <Tag key={tag} variant="study">{t(`about.skills.${idx}.study.${j}`)}</Tag>
                   ))}
                 </div>
               </div>

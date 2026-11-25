@@ -4,22 +4,22 @@ import { motion } from "framer-motion";
 import { SectionWrapper } from "../hoc";
 import { fadeIn, textVariant } from "../utils/motion";
 import useGithubData, { GITHUB_USERNAME as USERNAME } from "../api/UseGitHubData";
+import { useLanguage, t } from "../i18n";
+import { pixelPalette } from "../theme";
 
-const PURPLE = "#a78bfa"; // roxo claro
-const HOVER_RGB = [233, 223, 255];
-const BASE_RGB = [167, 139, 250];
+const ACCENT = "var(--accent)"; // cor de destaque do tema (roxo escuro / laranja claro)
 const COLS = 32;
 const ROWS = 32;
 
 /* ---------- Helpers ---------- */
 const parseDate = (s) => new Date(`${s}T00:00:00`);
-const fmtDay = (s) =>
-  parseDate(s).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
-const fmtMonth = (s) =>
-  new Date(s).toLocaleDateString("pt-BR", { month: "short", year: "numeric" }).replace(".", "");
-const fmtMonthShort = (s) =>
-  parseDate(s).toLocaleDateString("pt-BR", { month: "short", year: "numeric" }).replace(".", "");
-const fmtNumber = (n) => new Intl.NumberFormat("pt-BR").format(n);
+const fmtDay = (s, locale = "pt-BR") =>
+  parseDate(s).toLocaleDateString(locale, { day: "2-digit", month: "short", year: "numeric" });
+const fmtMonth = (s, locale = "pt-BR") =>
+  new Date(s).toLocaleDateString(locale, { month: "short", year: "numeric" }).replace(".", "");
+const fmtMonthShort = (s, locale = "pt-BR") =>
+  parseDate(s).toLocaleDateString(locale, { month: "short", year: "numeric" }).replace(".", "");
+const fmtNumber = (n, locale = "pt-BR") => new Intl.NumberFormat(locale).format(n);
 
 const computeStats = (days) => {
   const active = days.filter((d) => d.count > 0).length;
@@ -153,6 +153,11 @@ const PixelCanvas = ({ grid }) => {
       const gap = cell * 0.16;
       const s = cell - gap;
 
+      // cores de destaque do tema atual (roxo escuro / laranja claro)
+      const [pr, pg, pb] = pixelPalette().accent;
+      const [hr, hg, hb] = pixelPalette().hover;
+      const offColor = `rgba(${pixelPalette().off.join(",")},0.05)`;
+
       const mc = mouse.x / cell;
       const mr = mouse.y / cell;
       const scanRow = ((now / 70) % (ROWS + 14)) - 7;
@@ -178,14 +183,11 @@ const PixelCanvas = ({ grid }) => {
           }
           b = Math.min(1, Math.max(b, h * 0.85) + h * 0.25);
 
-          const cr = Math.round(BASE_RGB[0] + (HOVER_RGB[0] - BASE_RGB[0]) * h);
-          const cg = Math.round(BASE_RGB[1] + (HOVER_RGB[1] - BASE_RGB[1]) * h);
-          const cb = Math.round(BASE_RGB[2] + (HOVER_RGB[2] - BASE_RGB[2]) * h);
+          const cr = Math.round(pr + (hr - pr) * h);
+          const cg = Math.round(pg + (hg - pg) * h);
+          const cb = Math.round(pb + (hb - pb) * h);
 
-          ctx.fillStyle =
-            b < 0.03
-              ? "rgba(255,255,255,0.05)"
-              : `rgba(${cr},${cg},${cb},${0.15 + 0.85 * b})`;
+          ctx.fillStyle = b < 0.03 ? offColor : `rgba(${cr},${cg},${cb},${0.15 + 0.85 * b})`;
 
           const s2 = s * (1 + h * 0.4);
           const x = c * cell + cell / 2 - s2 / 2;
@@ -211,22 +213,24 @@ const PixelCanvas = ({ grid }) => {
   }, [grid]);
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#0d1117] p-4">
+    <div className="rounded-2xl border border-white/10 bg-surface-2 p-4">
       <canvas ref={canvasRef} className="block" />
     </div>
   );
 };
 
 /* ---------- Calendário de contribuições (SVG responsivo) ---------- */
+/* Níveis montados com variáveis CSS: acompanham o tema ativo. */
 const LEVEL_FILL = [
-  "rgba(255,255,255,0.06)",
-  "rgba(167,139,250,0.30)",
-  "rgba(167,139,250,0.55)",
-  "rgba(167,139,250,0.80)",
-  "rgba(196,181,253,1)",
+  "rgb(var(--mono-rgb) / 0.06)",
+  "rgb(var(--accent-rgb) / 0.30)",
+  "rgb(var(--accent-rgb) / 0.55)",
+  "rgb(var(--accent-rgb) / 0.80)",
+  "rgb(var(--accent-soft-rgb) / 1)",
 ];
 
 const Heatmap = ({ days, onHover }) => {
+  useLanguage(); // re-renderiza quando o idioma muda
   const SIZE = 11;
   const GAP = 3;
   const STEP = SIZE + GAP;
@@ -241,7 +245,7 @@ const Heatmap = ({ days, onHover }) => {
       viewBox={`0 0 ${width} ${height}`}
       className="w-full h-auto block"
       role="img"
-      aria-label="Calendário de contribuições dos últimos 12 meses"
+      aria-label={t("github.heatmapAria")}
       onMouseLeave={() => onHover(null)}
     >
       {days.map((d, i) => {
@@ -256,7 +260,7 @@ const Heatmap = ({ days, onHover }) => {
             width={SIZE}
             height={SIZE}
             rx={2.5}
-            fill={LEVEL_FILL[d.level] ?? LEVEL_FILL[0]}
+            style={{ fill: LEVEL_FILL[d.level] ?? LEVEL_FILL[0] }}
             onMouseEnter={() => onHover(d)}
             className="transition-opacity hover:opacity-70"
           />
@@ -274,27 +278,33 @@ const StatBox = ({ value, label, className = "" }) => (
   </div>
 );
 
-const RepoCard = ({ repo }) => (
-  <a
-    href={repo.html_url}
-    target="_blank"
-    rel="noreferrer"
-    className="block rounded-2xl border border-white/10 bg-[#151a22] p-5 hover:border-[#a78bfa]/50 transition-colors"
-  >
-    <p className="font-mono text-[15px] font-semibold text-[#c4b5fd] truncate">
-      {repo.name}
-    </p>
-    <p className="mt-3 font-mono text-[12px] text-gray-500">
-      {repo.language || "—"} · ★ {repo.stargazers_count} ·{" "}
-      {fmtMonth(repo.pushed_at)}
-    </p>
-  </a>
-);
+const RepoCard = ({ repo }) => {
+  const locale = useLanguage() === "en" ? "en-US" : "pt-BR";
+
+  return (
+    <a
+      href={repo.html_url}
+      target="_blank"
+      rel="noreferrer"
+      className="block rounded-2xl border border-white/10 bg-surface p-5 hover:border-accent/50 transition-colors"
+    >
+      <p className="font-mono text-[15px] font-semibold text-accent-soft truncate">
+        {repo.name}
+      </p>
+      <p className="mt-3 font-mono text-[12px] text-gray-500">
+        {repo.language || "—"} · ★ {repo.stargazers_count} ·{" "}
+        {fmtMonth(repo.pushed_at, locale)}
+      </p>
+    </a>
+  );
+};
 
 /* ---------- Seção ---------- */
 const Github = () => {
+  const lang = useLanguage(); // re-renderiza quando o idioma muda
   const { data, status } = useGithubData();
   const [hovered, setHovered] = useState(null);
+  const locale = lang === "en" ? "en-US" : "pt-BR";
 
   const stats = useMemo(() => (data ? computeStats(data.days) : null), [data]);
   const grid = useMemo(
@@ -314,19 +324,19 @@ const Github = () => {
       >
         <PixelCanvas grid={grid} />
 
-        <div className="mt-5 rounded-2xl border border-white/10 bg-[#0d1117] px-5 py-4 font-mono text-[14px]">
+        <div className="mt-5 rounded-2xl border border-white/10 bg-surface-2 px-5 py-4 font-mono text-[14px]">
           <div className="flex justify-between">
-            <span style={{ color: PURPLE }}>@{USERNAME}</span>
-            <span className="text-gray-500">últimos 7 meses</span>
+            <span style={{ color: ACCENT }}>@{USERNAME}</span>
+            <span className="text-gray-500">{t("github.lastMonths")}</span>
           </div>
           <p className="mt-1">
             <span className="text-gray-400">chore(github):</span>{" "}
             <span className="text-white">
               {status === "ok"
-                ? "sincronizado com o GitHub"
+                ? t("github.statusOk")
                 : status === "error"
-                ? "falha ao sincronizar"
-                : "sincronizando..."}
+                ? t("github.statusError")
+                : t("github.statusLoading")}
             </span>
           </p>
         </div>
@@ -336,14 +346,14 @@ const Github = () => {
       <div>
         <motion.div variants={textVariant()}>
           <div className="flex items-center gap-3 font-mono text-[14px]">
-            <span style={{ color: PURPLE }}>04 / github</span>
+            <span style={{ color: ACCENT }}>{t("github.label")}</span>
             <div className="flex gap-[3px]">
               {Array.from({ length: 18 }).map((_, i) => (
                 <span
                   key={i}
                   className="w-[10px] h-[10px] rounded-[2px]"
                   style={{
-                    background: i % 4 === 1 ? "#6b7280" : PURPLE,
+                    background: i % 4 === 1 ? "#6b7280" : ACCENT,
                     opacity: 0.25 + ((i * 29) % 75) / 100,
                   }}
                 />
@@ -351,36 +361,35 @@ const Github = () => {
             </div>
           </div>
           <h2 className="mt-3 text-white font-black tracking-tight text-[40px] sm:text-[56px] leading-[1.05]">
-            Atividade no GitHub
+            {t("github.title")}
           </h2>
           <span className="mt-4 inline-block font-mono text-[12px] text-gray-400 border border-dashed border-white/20 rounded-md px-2 py-1">
-            dados reais · API do GitHub
+            {t("github.badge")}
           </span>
         </motion.div>
 
         <motion.div variants={fadeIn("up", "spring", 0.2, 0.75)} className="mt-8">
           {status === "loading" && (
-            <div className="rounded-2xl border border-white/10 bg-[#151a22] p-8 font-mono text-[14px] text-gray-400 animate-pulse">
-              carregando dados do GitHub...
+            <div className="rounded-2xl border border-white/10 bg-surface p-8 font-mono text-[14px] text-gray-400 animate-pulse">
+              {t("github.loading")}
             </div>
           )}
 
           {status === "error" && (
-            <div className="rounded-2xl border border-white/10 bg-[#151a22] p-8">
+            <div className="rounded-2xl border border-white/10 bg-surface p-8">
               <p className="text-white font-semibold">
-                Não foi possível carregar os dados agora.
+                {t("github.errorTitle")}
               </p>
               <p className="mt-2 text-secondary text-[15px]">
-                A API do GitHub pode ter atingido o limite de requisições. Tente
-                novamente em alguns minutos ou veja direto no perfil.
+                {t("github.errorBody")}
               </p>
               <a
                 href={`https://github.com/${USERNAME}`}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-4 inline-block rounded-full bg-[#a78bfa] hover:bg-[#8b5cf6] text-[#0d1117] font-semibold text-[14px] px-4 py-2 transition-colors"
+                className="mt-4 inline-block rounded-full bg-accent hover:bg-accent-deep text-[#0d1117] font-semibold text-[14px] px-4 py-2 transition-colors"
               >
-                Abrir perfil no GitHub
+                {t("github.openProfile")}
               </a>
             </div>
           )}
@@ -390,51 +399,55 @@ const Github = () => {
               {/* Total + 4 métricas */}
               <div className="flex flex-col sm:flex-row sm:items-end gap-6">
                 <div className="shrink-0">
-                  <p className="font-black tracking-tight text-[64px] sm:text-[84px] leading-none text-[#a78bfa]">
-                    {fmtNumber(data.total)}
+                  <p className="font-black tracking-tight text-[64px] sm:text-[84px] leading-none text-accent">
+                    {fmtNumber(data.total, locale)}
                   </p>
                   <p className="mt-2 text-secondary text-[16px]">
-                    contribuições no último ano
+                    {t("github.contributions")}
                   </p>
                 </div>
 
-                <div className="flex-1 grid grid-cols-2 rounded-2xl border border-white/10 bg-[#151a22] overflow-hidden">
+                <div className="flex-1 grid grid-cols-2 rounded-2xl border border-white/10 bg-surface overflow-hidden">
                   <StatBox
                     value={stats.active}
-                    label="dias ativos"
+                    label={t("github.activeDays")}
                     className="border-r border-b border-white/10"
                   />
                   <StatBox
                     value={stats.current}
-                    label="sequência atual"
+                    label={t("github.currentStreak")}
                     className="border-b border-white/10"
                   />
                   <StatBox
                     value={stats.longest}
-                    label="maior sequência"
+                    label={t("github.longestStreak")}
                     className="border-r border-white/10"
                   />
                   <StatBox
                     value={stats.best.count}
-                    label={`melhor dia · ${fmtDay(stats.best.date)}`}
+                    label={t("github.bestDay", { date: fmtDay(stats.best.date, locale) })}
                   />
                 </div>
               </div>
 
               {/* Calendário */}
-              <div className="mt-6 rounded-2xl border border-white/10 bg-[#151a22] p-5 sm:p-6">
+              <div className="mt-6 rounded-2xl border border-white/10 bg-surface p-5 sm:p-6">
                 <Heatmap days={data.days} onHover={setHovered} />
 
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-2 font-mono text-[12px] text-gray-500">
                   <span>
                     {hovered
-                      ? `${hovered.count} contribuições · ${fmtDay(hovered.date)}`
-                      : `${fmtMonthShort(firstDay.date)} — ${fmtMonthShort(
-                          lastDay.date
+                      ? t("github.hoverCount", {
+                          n: hovered.count,
+                          date: fmtDay(hovered.date, locale),
+                        })
+                      : `${fmtMonthShort(firstDay.date, locale)} — ${fmtMonthShort(
+                          lastDay.date,
+                          locale
                         )}`}
                   </span>
                   <span className="flex items-center gap-1.5">
-                    menos
+                    {t("github.less")}
                     {LEVEL_FILL.map((c) => (
                       <span
                         key={c}
@@ -442,7 +455,7 @@ const Github = () => {
                         style={{ background: c }}
                       />
                     ))}
-                    mais
+                    {t("github.more")}
                   </span>
                 </div>
               </div>
@@ -450,15 +463,15 @@ const Github = () => {
               {/* Repositórios */}
               <div className="mt-8 flex items-center justify-between">
                 <p className="font-mono text-[12px] tracking-widest text-gray-500 uppercase">
-                  Repositórios atualizados recentemente
+                  {t("github.reposLabel")}
                 </p>
                 <a
                   href={`https://github.com/${USERNAME}?tab=repositories`}
                   target="_blank"
                   rel="noreferrer"
-                  className="font-mono text-[13px] text-[#c4b5fd] hover:text-white transition-colors"
+                  className="font-mono text-[13px] text-accent-soft hover:text-white transition-colors"
                 >
-                  Ver todos no GitHub ↗
+                  {t("github.viewAll")}
                 </a>
               </div>
 

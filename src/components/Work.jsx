@@ -6,16 +6,16 @@ import { github } from "../assets";
 import { SectionWrapper } from "../hoc";
 import { projects } from "../constants";
 import { fadeIn, textVariant } from "../utils/motion";
+import { useLanguage, t } from "../i18n";
+import { pixelPalette } from "../theme";
 
-const PURPLE = "#a78bfa"; // roxo claro
-const HOVER_RGB = [233, 223, 255]; // cor dos pixels sob o mouse
-const BASE_RGB = [167, 139, 250];
+const ACCENT = "var(--accent)"; // cor de destaque do tema (roxo escuro / laranja claro)
 const COLS = 32;
 const ROWS = 32;
 const PER_PAGE = 2; // projetos por página
 
 const Tag = ({ children }) => (
-  <span className="font-mono text-[12px] font-semibold text-white bg-[#a78bfa]/15 border border-[#a78bfa]/50 rounded-full px-2.5 py-0.5">
+  <span className="font-mono text-[12px] font-semibold text-white bg-accent/15 border border-accent/50 rounded-full px-2.5 py-0.5">
     {children}
   </span>
 );
@@ -126,6 +126,11 @@ const PixelTerminal = () => {
       const gap = cell * 0.16;
       const s = cell - gap;
 
+      // cores de destaque do tema atual (roxo escuro / laranja claro)
+      const [pr, pg, pb] = pixelPalette().accent;
+      const [hr, hg, hb] = pixelPalette().hover;
+      const offColor = `rgba(${pixelPalette().off.join(",")},0.05)`;
+
       const mc = mouse.x / cell;
       const mr = mouse.y / cell;
       const scanRow = ((now / 70) % (ROWS + 14)) - 7;
@@ -151,14 +156,11 @@ const PixelTerminal = () => {
           }
           b = Math.min(1, Math.max(b, h * 0.85) + h * 0.25);
 
-          const cr = Math.round(BASE_RGB[0] + (HOVER_RGB[0] - BASE_RGB[0]) * h);
-          const cg = Math.round(BASE_RGB[1] + (HOVER_RGB[1] - BASE_RGB[1]) * h);
-          const cb = Math.round(BASE_RGB[2] + (HOVER_RGB[2] - BASE_RGB[2]) * h);
+          const cr = Math.round(pr + (hr - pr) * h);
+          const cg = Math.round(pg + (hg - pg) * h);
+          const cb = Math.round(pb + (hb - pb) * h);
 
-          ctx.fillStyle =
-            b < 0.03
-              ? "rgba(255,255,255,0.05)"
-              : `rgba(${cr},${cg},${cb},${0.15 + 0.85 * b})`;
+          ctx.fillStyle = b < 0.03 ? offColor : `rgba(${cr},${cg},${cb},${0.15 + 0.85 * b})`;
 
           const s2 = s * (1 + h * 0.4);
           const x = c * cell + cell / 2 - s2 / 2;
@@ -184,7 +186,7 @@ const PixelTerminal = () => {
   }, []);
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#0d1117] p-4">
+    <div className="rounded-2xl border border-white/10 bg-surface-2 p-4">
       <canvas ref={canvasRef} className="block" />
     </div>
   );
@@ -194,21 +196,21 @@ const PixelTerminal = () => {
 const ProjectThumb = ({ project, onSelect }) => (
   <button
     onClick={onSelect}
-    className="group relative aspect-square overflow-hidden rounded-2xl border border-white/10 hover:border-[#a78bfa]/60 text-left transition-colors"
+    className="group relative aspect-square overflow-hidden rounded-2xl border border-white/10 hover:border-accent/60 text-left transition-colors"
   >
     <img
       src={project.image}
       alt={project.name}
       className="w-full h-full object-cover opacity-80 transition-all duration-300 group-hover:scale-105 group-hover:opacity-100"
     />
-    <div className="absolute inset-0 bg-gradient-to-t from-[#0d1117] via-[#0d1117]/30 to-transparent" />
+    <div className="absolute inset-0 bg-gradient-to-t from-surface-2 via-surface-2/30 to-transparent" />
 
     <div className="absolute bottom-0 left-0 right-0 p-4">
-      <p className="text-white font-bold text-[18px] leading-tight group-hover:text-[#c4b5fd] transition-colors">
+      <p className="text-white font-bold text-[18px] leading-tight group-hover:text-accent-soft transition-colors">
         {project.name}
       </p>
-      <p className="mt-1 font-mono text-[12px] text-gray-400 group-hover:text-[#a78bfa] transition-colors">
-        ver detalhes →
+      <p className="mt-1 font-mono text-[12px] text-gray-400 group-hover:text-accent transition-colors">
+        {t("work.viewDetails")}
       </p>
     </div>
   </button>
@@ -248,12 +250,12 @@ const ProjectModal = ({ project, onClose }) => {
         exit={{ opacity: 0, y: 30, scale: 0.96 }}
         transition={{ duration: 0.25, ease: "easeOut" }}
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-[#151a22] p-5 sm:p-6"
+        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-surface p-5 sm:p-6"
       >
         <button
           onClick={onClose}
-          aria-label="Fechar"
-          className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-[#0d1117]/80 border border-white/10 hover:border-[#a78bfa]/60 text-white flex items-center justify-center transition-colors"
+          aria-label={t("work.close")}
+          className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-surface-2/80 border border-white/10 hover:border-accent/60 text-white flex items-center justify-center transition-colors"
         >
           ✕
         </button>
@@ -271,7 +273,7 @@ const ProjectModal = ({ project, onClose }) => {
         </h3>
 
         <p className="mt-3 text-secondary text-[15px] leading-[26px]">
-          {project.description}
+          {t(`work.projectDescriptions.${project.name}`, undefined, project.description)}
         </p>
 
         <div className="mt-5 flex flex-wrap gap-1.5">
@@ -286,10 +288,10 @@ const ProjectModal = ({ project, onClose }) => {
               href={project.source_code_link}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-2 rounded-full bg-[#a78bfa] hover:bg-[#8b5cf6] text-[#0d1117] font-semibold text-[14px] px-4 py-2 transition-colors"
+              className="flex items-center gap-2 rounded-full bg-accent hover:bg-accent-deep text-[#0d1117] font-semibold text-[14px] px-4 py-2 transition-colors"
             >
               <img src={github} alt="github" className="w-4 h-4 object-contain" />
-              Ver código
+              {t("work.viewCode")}
             </a>
           )}
           {project.repository_link && (
@@ -297,9 +299,9 @@ const ProjectModal = ({ project, onClose }) => {
               href={project.repository_link}
               target="_blank"
               rel="noreferrer"
-              className="rounded-full border border-white/15 hover:border-[#a78bfa]/60 text-white font-semibold text-[14px] px-4 py-2 transition-colors"
+              className="rounded-full border border-white/15 hover:border-accent/60 text-white font-semibold text-[14px] px-4 py-2 transition-colors"
             >
-              Repositório
+              {t("work.repository")}
             </a>
           )}
         </div>
@@ -311,6 +313,7 @@ const ProjectModal = ({ project, onClose }) => {
 
 /* ---------- Seção ---------- */
 const Works = () => {
+  useLanguage(); // re-renderiza quando o idioma muda
   const [page, setPage] = useState(0);
   const [direction, setDirection] = useState(1);
   const [selected, setSelected] = useState(null); // projeto aberto no modal
@@ -335,9 +338,9 @@ const Works = () => {
         >
           <PixelTerminal />
 
-          <div className="mt-5 rounded-2xl border border-white/10 bg-[#0d1117] px-5 py-4 font-mono text-[14px]">
+          <div className="mt-5 rounded-2xl border border-white/10 bg-surface-2 px-5 py-4 font-mono text-[14px]">
             <div className="flex justify-between">
-              <span style={{ color: PURPLE }}>7c02e8d</span>
+              <span style={{ color: ACCENT }}>7c02e8d</span>
               <span className="text-gray-500">
                 {pad(page + 1)} / {pad(totalPages)}
               </span>
@@ -345,7 +348,7 @@ const Works = () => {
             <p className="mt-1">
               <span className="text-gray-400">feat(projects):</span>{" "}
               <span className="text-white">
-                {projects.length} projetos em destaque
+                {t("work.featured", { n: projects.length })}
               </span>
             </p>
           </div>
@@ -355,14 +358,14 @@ const Works = () => {
         <div>
           <motion.div variants={textVariant()}>
             <div className="flex items-center gap-3 font-mono text-[14px]">
-              <span style={{ color: PURPLE }}>02 / projetos</span>
+              <span style={{ color: ACCENT }}>{t("work.label")}</span>
               <div className="flex gap-[3px]">
                 {Array.from({ length: 18 }).map((_, i) => (
                   <span
                     key={i}
                     className="w-[10px] h-[10px] rounded-[2px]"
                     style={{
-                      background: i % 3 === 1 ? "#6b7280" : PURPLE,
+                      background: i % 3 === 1 ? "#6b7280" : ACCENT,
                       opacity: 0.25 + ((i * 53) % 75) / 100,
                     }}
                   />
@@ -370,7 +373,7 @@ const Works = () => {
               </div>
             </div>
             <h2 className="mt-3 text-white font-black tracking-tight text-[40px] sm:text-[56px] leading-[1.05]">
-              Projetos.
+              {t("work.title")}
             </h2>
           </motion.div>
 
@@ -378,8 +381,7 @@ const Works = () => {
             variants={fadeIn("", "", 0.1, 1)}
             className="mt-4 text-secondary text-[17px] leading-[30px] max-w-3xl"
           >
-            Exemplos reais do meu trabalho, com o código disponível no GitHub.
-            Clique em um projeto para ver os detalhes.
+            {t("work.intro")}
           </motion.p>
 
           {/* Projetos da página atual (2 por página) */}
@@ -410,7 +412,7 @@ const Works = () => {
             {totalPages > 1 && (
               <div className="mt-6 flex items-center justify-between">
                 <span className="font-mono text-[13px] text-gray-500">
-                  página {pad(page + 1)} de {pad(totalPages)}
+                  {t("work.pageOf", { n: pad(page + 1), total: pad(totalPages) })}
                 </span>
 
                 <div className="flex items-center gap-3">
@@ -419,10 +421,10 @@ const Works = () => {
                       <button
                         key={i}
                         onClick={() => goTo(i)}
-                        aria-label={`Ir para a página ${i + 1}`}
+                        aria-label={t("work.ariaPage", { n: i + 1 })}
                         className={`h-2 rounded-full transition-all ${
                           i === page
-                            ? "w-6 bg-[#a78bfa]"
+                            ? "w-6 bg-accent"
                             : "w-2 bg-white/20 hover:bg-white/40"
                         }`}
                       />
@@ -432,16 +434,16 @@ const Works = () => {
                   <button
                     onClick={() => goTo(page - 1)}
                     disabled={page === 0}
-                    aria-label="Página anterior"
-                    className="w-10 h-10 rounded-full border border-white/10 text-white flex items-center justify-center hover:border-[#a78bfa]/60 transition-colors disabled:opacity-30 disabled:hover:border-white/10 disabled:cursor-not-allowed"
+                    aria-label={t("work.ariaPrev")}
+                    className="w-10 h-10 rounded-full border border-white/10 text-white flex items-center justify-center hover:border-accent/60 transition-colors disabled:opacity-30 disabled:hover:border-white/10 disabled:cursor-not-allowed"
                   >
                     ←
                   </button>
                   <button
                     onClick={() => goTo(page + 1)}
                     disabled={page === totalPages - 1}
-                    aria-label="Próxima página"
-                    className="w-10 h-10 rounded-full border border-white/10 text-white flex items-center justify-center hover:border-[#a78bfa]/60 transition-colors disabled:opacity-30 disabled:hover:border-white/10 disabled:cursor-not-allowed"
+                    aria-label={t("work.ariaNext")}
+                    className="w-10 h-10 rounded-full border border-white/10 text-white flex items-center justify-center hover:border-accent/60 transition-colors disabled:opacity-30 disabled:hover:border-white/10 disabled:cursor-not-allowed"
                   >
                     →
                   </button>

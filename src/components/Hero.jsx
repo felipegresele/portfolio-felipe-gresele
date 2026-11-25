@@ -1,10 +1,11 @@
 import { styles } from "../styles";
 import useGithubData from "../api/UseGitHubData";
+import { useLanguage, t } from "../i18n";
 
 const GITHUB_URL = "https://github.com/felipegresele";
 const LINKEDIN_URL = "https://www.linkedin.com/in/felipe-gresele-3065a72a3/";
 
-const fmtNumber = (n) => new Intl.NumberFormat("pt-BR").format(n);
+const fmtNumber = (n, locale = "pt-BR") => new Intl.NumberFormat(locale).format(n);
 
 const GithubIcon = () => (
   <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor" aria-hidden="true">
@@ -23,24 +24,26 @@ const socialClass =
 
 export default function Hero() {
   const { data, status } = useGithubData();
+  const lang = useLanguage();
+  const locale = lang === "en" ? "en-US" : "pt-BR";
 
   // enquanto carrega ou se a API falhar, mostra "—" em vez de número falso
   const ghValue = (value) =>
-    status === "ok" && data ? fmtNumber(value) : "—";
+    status === "ok" && data ? fmtNumber(value, locale) : "—";
 
   const stats = [
     {
       value: "2+",
-      label: "anos de experiência em tecnologia",
+      label: t("hero.stats.0"),
     },
     {
       value: ghValue(data?.publicRepos),
-      label: "repositórios públicos no GitHub",
+      label: t("hero.stats.1"),
       loading: status === "loading",
     },
     {
       value: ghValue(data?.total),
-      label: "contribuições no último ano",
+      label: t("hero.stats.2"),
       loading: status === "loading",
     },
   ];
@@ -57,13 +60,10 @@ export default function Hero() {
 
         <div className="w-full">
           <h1 className={`${styles.heroHeadText} text-white`}>
-            Olá, eu sou <span className="text-[#915EFF]">Felipe Gresele</span>
+            {t("hero.greeting")} <span className="text-[#915EFF]">{t("hero.name")}</span>
           </h1>
           <p className={`${styles.heroSubText} mt-2 text-white-100 max-w-2xl !text-[18px] sm:!text-[20px] !leading-[30px]`}>
-            Engenheiro de Software com visão sistêmica, conectando arquitetura, APIs,
-            cloud e testes garantindo qualidade para construir soluções robustas e escaláveis.
-            Atualmente, exploro IA generativa, LLMs e agentes para evoluir a forma
-            como desenvolvemos software.
+            {t("hero.intro")}
           </p>
 
           {/* Botões */}
@@ -73,7 +73,7 @@ export default function Hero() {
               href="Curriculo-Backend-Felipe-Gresele.pdf"
               download={"Currículo-BackEnd-Felipe-Gresele.pdf"}
             >
-              Baixar CV
+              {t("hero.cta")}
             </a>
 
             <a

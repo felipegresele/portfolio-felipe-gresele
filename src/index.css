@@ -19,6 +19,73 @@
   display: block;
 }
 
+/* ---------- Temas ----------
+   O tema escuro (padrão) mantém os valores originais do site.
+   O tema claro troca as variáveis via html[data-theme="light"]. */
+:root {
+  --bg-page: #050816; /* tailwind "primary" */
+  --text-secondary: #aaa6c3; /* tailwind "secondary" */
+  --text-soft: #f3f3f3; /* texto suave do hero (tailwind "white-100") */
+  --mono-rgb: 255 255 255; /* canal do "branco" (text-white, border-white/10...) */
+  --surface-rgb: 21 26 34; /* #151a22 */
+  --surface-2-rgb: 13 17 23; /* #0d1117 */
+  --accent-rgb: 167 139 250; /* roxo de destaque */
+  --accent-soft-rgb: 196 181 253; /* #c4b5fd */
+  --accent-deep-rgb: 139 92 246; /* #8b5cf6 (hover) */
+  --error-rgb: 248 113 113; /* red-400 */
+  --gray-300-rgb: 209 213 219;
+  --gray-400-rgb: 156 163 175;
+  --gray-500-rgb: 107 114 128;
+  --pixel-hover-rgb: 233 223 255; /* cor dos pixels do canvas sob o mouse */
+  --pixel-off-rgb: 255 255 255; /* pixels apagados do canvas */
+  --hero-accent: #915eff; /* destaque do nome/ponto do hero (tema escuro) */
+  --hero-line-accent: #804dee; /* gradiente da linha vertical do hero (escuro) */
+  --cta-bg: #818cf8; /* botão "Baixar CV" (indigo-400) no tema escuro */
+  --cta-bg-hover: #4f46e5; /* hover do botão (indigo-600) no tema escuro */
+}
+
+html[data-theme="light"] * {
+  color-scheme: light;
+}
+
+html[data-theme="light"] {
+  --bg-page: #f5f5f5;
+  --text-secondary: #52525b;
+  --text-soft: #3f3f46;
+  --mono-rgb: 10 10 10; /* texto principal quase preto (#0a0a0a) */
+  --surface-rgb: 255 255 255; /* cards brancos */
+  --surface-2-rgb: 255 255 255;
+  --accent-rgb: 249 115 22; /* laranja de destaque (#f97316) */
+  --accent-soft-rgb: 194 65 12;
+  --accent-deep-rgb: 234 88 12; /* hover do laranja */
+  --error-rgb: 185 28 28;
+  --gray-300-rgb: 55 65 81;
+  --gray-400-rgb: 75 85 99;
+  --gray-500-rgb: 107 114 128;
+  --pixel-hover-rgb: 194 65 12;
+  --pixel-off-rgb: 10 10 10;
+}
+
+/* No tema claro, a arte de fundo do hero sai (fundo claro liso);
+   o padrão escuro continua apenas no tema escuro. Nenhum elemento muda
+   de posição. */
+html[data-theme="light"] .bg-hero-pattern {
+  background-image: none;
+}
+
+/* No tema claro, o menu mobile vira um painel branco (os ícones do hambúrguer
+   e o fundo preto do .black-gradient ficariam invisíveis sobre ele). */
+html[data-theme="light"] .black-gradient {
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgb(10 10 10 / 0.15);
+}
+
+/* Ícones do menu mobile (menu.svg / close.svg são brancos no arquivo). */
+html[data-theme="light"] img[src*="menu"],
+html[data-theme="light"] img[src*="close"] {
+  filter: brightness(0);
+}
+
 .black-gradient {
   background: #000000; /* fallback for old browsers */
   background: -webkit-linear-gradient(
