@@ -20,7 +20,7 @@ const LinkedinIcon = () => (
 );
 
 const socialClass =
-  "inline-flex items-center gap-2 rounded-full border border-white/15 hover:border-[#915EFF] hover:text-white text-white/80 px-4 py-2 transition-colors";
+  "inline-flex items-center gap-2 rounded-full border border-white/15 hover:border-[color:var(--hero-accent)] hover:text-white text-white/80 px-4 py-2 transition-colors";
 
 export default function Hero() {
   const { data, status } = useGithubData();
@@ -50,17 +50,21 @@ export default function Hero() {
 
   return (
     <section className={`relative w-full min-h-screen mx-auto mb-6`}>
+      {/* Sem absolute: em mobile o conteúdo passa da altura da tela e, se
+          posicionado fora do fluxo, transborda para a seção About. Com pt-[120px]
+          a seção cresce junto com o conteúdo (desktop continua igual: min-h-screen). */}
       <div
-        className={`absolute inset-0 top-[120px] max-w-7xl mx-auto ${styles.paddingX} flex flex-row items-start gap-5`}
+        className={`pt-[120px] max-w-7xl mx-auto ${styles.paddingX} flex flex-row items-start gap-5`}
       >
         <div className="flex flex-col justify-center items-center mt-5">
-          <div className="w-5 h-5 rounded-full bg-[#915EFF]" />
+          <div className="w-5 h-5 rounded-full bg-[var(--hero-accent)]" />
           <div className="w-1 sm:h-80 h-40 violet-gradient" />
         </div>
 
         <div className="w-full">
           <h1 className={`${styles.heroHeadText} text-white`}>
-            {t("hero.greeting")} <span className="text-[#915EFF]">{t("hero.name")}</span>
+            {t("hero.greeting")}{" "}
+            <span className="text-[color:var(--hero-name)]">{t("hero.name")}</span>
           </h1>
           <p className={`${styles.heroSubText} mt-2 text-white-100 max-w-2xl !text-[18px] sm:!text-[20px] !leading-[30px]`}>
             {t("hero.intro")}
@@ -69,7 +73,7 @@ export default function Hero() {
           {/* Botões */}
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <a
-              className="bg-indigo-400 hover:bg-indigo-600 text-white px-4 py-2 rounded-full inline-block transition-colors"
+              className="bg-[var(--cta-bg)] hover:bg-[var(--cta-bg-hover)] text-[color:var(--cta-text)] px-4 py-2 rounded-full inline-block transition-colors"
               href="Curriculo-Backend-Felipe-Gresele.pdf"
               download={"Currículo-BackEnd-Felipe-Gresele.pdf"}
             >

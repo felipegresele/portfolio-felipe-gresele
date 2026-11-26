@@ -13,6 +13,34 @@
   color-scheme: dark;
 }
 
+/* ---------- Barra de rolagem ----------
+   Fina, translúcida e na cor de destaque do tema (violeta no escuro,
+   laranja no claro). Firefox usa scrollbar-*; Chrome/Edge/Safari usam
+   ::-webkit-scrollbar. Em celulares a barra já é flutuante e o estilo
+   quase não aparece — o efeito é para desktop. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--accent-rgb) / 0.55) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--accent-rgb) / 0.55);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--accent-rgb) / 0.85);
+}
+
 .hash-span {
   margin-top: -100px;
   padding-bottom: 100px;
@@ -38,10 +66,23 @@
   --gray-500-rgb: 107 114 128;
   --pixel-hover-rgb: 233 223 255; /* cor dos pixels do canvas sob o mouse */
   --pixel-off-rgb: 255 255 255; /* pixels apagados do canvas */
-  --hero-accent: #915eff; /* destaque do nome/ponto do hero (tema escuro) */
+  --hero-accent: #915eff; /* ponto e hover dos botões sociais do hero (escuro) */
+  --hero-name: #915eff; /* nome no hero (escuro) */
   --hero-line-accent: #804dee; /* gradiente da linha vertical do hero (escuro) */
+  --hero-line-fade: rgba(60, 51, 80, 0);
   --cta-bg: #818cf8; /* botão "Baixar CV" (indigo-400) no tema escuro */
   --cta-bg-hover: #4f46e5; /* hover do botão (indigo-600) no tema escuro */
+  --cta-text: #ffffff; /* texto do botão no tema escuro */
+  /* Rótulos mono das seções ("01 / sobre", HEAD, origin...). Segue --mono-rgb,
+     por isso é branco no escuro e quase preto no claro, sem trocar nada aqui. */
+  --section-label: rgb(var(--mono-rgb));
+  /* Quadradinhos decorativos ao lado dos rótulos.
+     No escuro: 1/3 cinza (como sempre foi) e o resto transparente.
+     No claro: o resto vira laranja / preto / branco (varia por índice na rotação). */
+  --sq-gray: #6b7280;
+  --sq-fill-0: transparent;
+  --sq-fill-1: transparent;
+  --sq-fill-2: transparent;
 }
 
 html[data-theme="light"] * {
@@ -64,6 +105,16 @@ html[data-theme="light"] {
   --gray-500-rgb: 107 114 128;
   --pixel-hover-rgb: 194 65 12;
   --pixel-off-rgb: 10 10 10;
+  --hero-accent: #f97316; /* ponto e hover dos botões sociais do hero (laranja) */
+  --hero-name: #a1a1aa; /* nome no hero: cinza claro no tema claro */
+  --hero-line-accent: #f97316; /* gradiente da linha vertical do hero (laranja) */
+  --hero-line-fade: rgba(249, 115, 22, 0);
+  --cta-bg: #f97316; /* botão "Baixar CV" laranja no tema claro */
+  --cta-bg-hover: #ea580c; /* hover do botão (laranja escuro) */
+  --cta-text: #0d1117; /* texto escuro, padrão dos outros CTAs do tema claro */
+  --sq-fill-0: #f97316; /* laranja */
+  --sq-fill-1: rgb(var(--mono-rgb)); /* quase preto (#0a0a0a) */
+  --sq-fill-2: #ffffff; /* branco */
 }
 
 /* No tema claro, a arte de fundo do hero sai (fundo claro liso);
@@ -100,13 +151,20 @@ html[data-theme="light"] img[src*="close"] {
   ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 }
 
+/* Linha vertical do hero. Era roxa fixa; agora usa --hero-line-accent /
+   --hero-line-fade para acompanhar o tema (roxa no escuro, laranja no claro).
+   O nome antigo da classe fica para não quebrar quem já a usa. */
 .violet-gradient {
-  background: #804dee;
-  background: linear-gradient(-90deg, #804dee 0%, rgba(60, 51, 80, 0) 100%);
+  background: var(--hero-line-accent);
   background: -webkit-linear-gradient(
     -90deg,
-    #804dee 0%,
-    rgba(60, 51, 80, 0) 100%
+    var(--hero-line-accent) 0%,
+    var(--hero-line-fade) 100%
+  );
+  background: linear-gradient(
+    -90deg,
+    var(--hero-line-accent) 0%,
+    var(--hero-line-fade) 100%
   );
 }
 

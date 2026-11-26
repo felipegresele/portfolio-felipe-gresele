@@ -9,7 +9,7 @@ import { fadeIn, textVariant } from "../utils/motion";
 import { useLanguage, t } from "../i18n";
 import { pixelPalette } from "../theme";
 
-const ACCENT = "var(--accent)"; // cor de destaque do tema (roxo escuro / laranja claro)
+const ACCENT = "var(--section-label)"; // rótulos mono ("02 / projetos", 7c02e8d...): branco no escuro, quase preto no claro
 const COLS = 32;
 const ROWS = 32;
 const PER_PAGE = 2; // projetos por página
@@ -365,7 +365,7 @@ const Works = () => {
                     key={i}
                     className="w-[10px] h-[10px] rounded-[2px]"
                     style={{
-                      background: i % 3 === 1 ? "#6b7280" : ACCENT,
+                      background: i % 3 === 1 ? "var(--sq-gray)" : `var(--sq-fill-${i % 3})`,
                       opacity: 0.25 + ((i * 53) % 75) / 100,
                     }}
                   />

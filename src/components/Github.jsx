@@ -7,7 +7,7 @@ import useGithubData, { GITHUB_USERNAME as USERNAME } from "../api/UseGitHubData
 import { useLanguage, t } from "../i18n";
 import { pixelPalette } from "../theme";
 
-const ACCENT = "var(--accent)"; // cor de destaque do tema (roxo escuro / laranja claro)
+const ACCENT = "var(--section-label)"; // rótulos mono ("04 / github", @usuário...): branco no escuro, quase preto no claro
 const COLS = 32;
 const ROWS = 32;
 
@@ -353,7 +353,7 @@ const Github = () => {
                   key={i}
                   className="w-[10px] h-[10px] rounded-[2px]"
                   style={{
-                    background: i % 4 === 1 ? "#6b7280" : ACCENT,
+                    background: i % 4 === 1 ? "var(--sq-gray)" : `var(--sq-fill-${i % 3})`,
                     opacity: 0.25 + ((i * 29) % 75) / 100,
                   }}
                 />

@@ -5,7 +5,7 @@ import { SectionWrapper } from "../hoc";
 import { fadeIn, textVariant } from "../utils/motion";
 import { useLanguage, t } from "../i18n";
 
-const ACCENT = "var(--accent)"; // cor de destaque do tema (roxo escuro / laranja claro)
+const ACCENT = "var(--section-label)"; // rótulos mono ("01 / sobre"...): branco no escuro, quase preto no claro
 
 /* Skills curadas:
    core  = tecnologias principais (destacadas em roxo)
@@ -465,7 +465,7 @@ const About = () => {
                 key={i}
                 className="w-[10px] h-[10px] rounded-[2px]"
                 style={{
-                  background: i % 3 === 0 ? "#6b7280" : ACCENT,
+                  background: i % 3 === 0 ? "var(--sq-gray)" : `var(--sq-fill-${i % 3})`,
                   opacity: 0.25 + ((i * 37) % 75) / 100,
                 }}
               />
